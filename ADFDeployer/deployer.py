@@ -147,34 +147,33 @@ class AzureDataFactoryDeployer(object):
         old_objects = self._get(object_type)
         old_objects = {o['name']: o for o in old_objects}
 
-        # Get updated list of linked services according to the current state of
-        # the repository.
+        # Get updated list of objects according to the current state of the
+        # repository.
         new_objects = self._get_objects_from_repo(object_type)
         new_objects = {o['name']: o for o in new_objects}
 
-        # The linked services that were in the existing list but not in the list
-        # of updated linked services are up for deletion. Note that there is a
-        # possibility that they were renamed, but in this case a new linked
-        # service will be made with the new name instead.
+        # The objects that were in the existing list but not in the list of
+        # updated objects are up for deletion. Note that there is a possibility
+        # that they were renamed, but in this case a new object will be made
+        # with the new name instead.
         objects_to_be_deleted = [
             o for o in old_objects
             if o not in new_objects
         ]
 
-        # All linked services that have their names in both the old and updated
-        # list of linked services are to be updated, but only if their contents
-        # are not the same.
+        # All objects that have their names in both the old and updated list of
+        # objects are to be updated, but only if their contents are no longer
+        # the same.
         objects_to_be_updated = [
             o for o in new_objects
             if o in old_objects
             and new_objects[o]['properties'] != old_objects[o]['properties']
         ]
 
-        # The only linked services that are new, are the ones that do not appear
-        # in the existing list of linked services. Note that some of these might
-        # be renamed versions of existing linked services, but it does little
-        # harm to create a new one as the previous name will then be up for
-        # deletion.
+        # The only objects that are new, are the ones that do not appear in the
+        # existing list of objects. Note that some of these might be renamed
+        # versions of existing objects, but it does little harm to create a new
+        # one as the previous name will then be up for deletion.
         objects_to_be_created = [
             o for o in new_objects
             if o not in old_objects
@@ -208,7 +207,7 @@ class AzureDataFactoryDeployer(object):
             sleep(5)
 
             for o in objects_to_be_created + objects_to_be_updated:
-                print(self._start_trigger(o))
+                self._start_trigger(o)
 
     def _get_objects_from_repo(self, object_type):
         object_dir_path = '{}/{}'.format(self._path, object_type)
