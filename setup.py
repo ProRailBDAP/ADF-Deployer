@@ -11,7 +11,6 @@ setup(
     version=version,
     packages=find_packages(),
     install_requires=[
-        'azure >= 4.0.0',
         'requests >= 2.22.0',
     ],
     entry_points={
