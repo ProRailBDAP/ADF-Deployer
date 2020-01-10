@@ -7,6 +7,9 @@ from requests.sessions import Session
 
 
 class ADFObjectType(Enum):
+    """
+    Set of  object types in Azure Data Factory that can be deployed.
+    """
     LinkedService = 'linkedService'
     Dataset = 'dataset'
     Pipeline = 'pipeline'
@@ -70,71 +73,6 @@ class AzureDataFactoryDeployer(object):
                 credentials.token['access_token'],
             ),
         })
-
-    def _create(self, endpoint, name, data):
-        response = self.session.put(
-            '{}/{}s/{}?api-version={}'.format(
-                self._adf_url,
-                endpoint,
-                name,
-                self.API_VERSION,
-            ),
-            json=data,
-        )
-
-        return response.status_code
-
-    def _get(self, endpoint):
-        response = self.session.get(
-            '{}/{}s?api-version={}'.format(
-                self._adf_url,
-                endpoint,
-                self.API_VERSION,
-            ),
-        )
-
-        return response.json()['value']
-
-    def _update(self, endpoint, name, data, etag):
-        response = self.session.put(
-            '{}/{}s/{}?api-version={}'.format(
-                self._adf_url,
-                endpoint,
-                name,
-                self.API_VERSION,
-            ),
-            json=data,
-            headers={
-                'If-Match': etag,
-            },
-        )
-
-        return response.status_code
-
-    def _delete(self, endpoint, name):
-        response = self.session.delete(
-            '{}/{}s/{}?api-version={}'.format(
-                self._adf_url,
-                endpoint,
-                name,
-                self.API_VERSION,
-            ),
-        )
-
-        return response.status_code
-
-    def _start_trigger(self, trigger_name):
-        print('Starting trigger: {}'.format(trigger_name))
-        response = self.session.post(
-            '{}/triggers/{}/start?api-version={}'.format(
-                self._adf_url,
-                trigger_name,
-                self.API_VERSION,
-            ),
-        )
-        print('Started trigger: {}'.format(trigger_name))
-
-        return response.status_code
 
     def deploy(self):
         print('Starting deployment...')
@@ -208,6 +146,71 @@ class AzureDataFactoryDeployer(object):
 
             for o in objects_to_be_created + objects_to_be_updated:
                 self._start_trigger(o)
+
+    def _create(self, object_type, name, data):
+        response = self.session.put(
+            '{}/{}s/{}?api-version={}'.format(
+                self._adf_url,
+                object_type,
+                name,
+                self.API_VERSION,
+            ),
+            json=data,
+        )
+
+        return response.status_code
+
+    def _get(self, object_type):
+        response = self.session.get(
+            '{}/{}s?api-version={}'.format(
+                self._adf_url,
+                object_type,
+                self.API_VERSION,
+            ),
+        )
+
+        return response.json()['value']
+
+    def _update(self, object_type, name, data, etag):
+        response = self.session.put(
+            '{}/{}s/{}?api-version={}'.format(
+                self._adf_url,
+                object_type,
+                name,
+                self.API_VERSION,
+            ),
+            json=data,
+            headers={
+                'If-Match': etag,
+            },
+        )
+
+        return response.status_code
+
+    def _delete(self, object_type, name):
+        response = self.session.delete(
+            '{}/{}s/{}?api-version={}'.format(
+                self._adf_url,
+                object_type,
+                name,
+                self.API_VERSION,
+            ),
+        )
+
+        return response.status_code
+
+    def _start_trigger(self, trigger_name):
+        print('Starting trigger: {}'.format(trigger_name))
+        response = self.session.post(
+            '{}/triggers/{}/start?api-version={}'.format(
+                self._adf_url,
+                trigger_name,
+                self.API_VERSION,
+            ),
+        )
+        print('Started trigger: {}'.format(trigger_name))
+
+        return response.status_code
 
     def _get_objects_from_repo(self, object_type):
         object_dir_path = '{}/{}'.format(self._path, object_type)
